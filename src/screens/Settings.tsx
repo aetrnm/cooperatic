@@ -22,7 +22,6 @@ function Settings() {
     await store.set("theme", newTheme);
     await store.save();
     setTheme(newTheme);
-    console.log(newTheme);
   };
 
   return (

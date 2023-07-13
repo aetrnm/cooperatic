@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.mac-checkbox-size {
+.mac-checkbox {
   height: 16px;
   width: 16px;
 }

@@ -1,7 +1,9 @@
 import { Store } from "tauri-plugin-store-api";
-import { useEffect, useState } from "react";
-
 const store = new Store(".settings.dat");
+import { platform } from "@tauri-apps/api/os";
+const platformName = await platform();
+
+import { useEffect, useState } from "react";
 
 function Settings() {
   const [theme, setTheme] = useState("");
@@ -23,8 +25,6 @@ function Settings() {
     console.log(newTheme);
   };
 
-  const isMacOS = window.navigator.platform.startsWith("Mac");
-
   return (
     <div className="p-4">
       <h1 className="text-2xl mb-4">Settings</h1>
@@ -34,7 +34,7 @@ function Settings() {
           <input
             type="checkbox"
             className={`form-checkbox accent-purple-500 cursor-pointer ${
-              isMacOS ? "mac-checkbox-size" : ""
+              platformName === "darwin" ? "mac-checkbox" : "h-6 w-6"
             }`}
             onChange={handleThemeSwitch}
             checked={theme === "dark"}

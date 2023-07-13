@@ -23,6 +23,8 @@ function Settings() {
     console.log(newTheme);
   };
 
+  const isMacOS = window.navigator.platform.startsWith("Mac");
+
   return (
     <div className="p-4">
       <h1 className="text-2xl mb-4">Settings</h1>
@@ -31,7 +33,9 @@ function Settings() {
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="form-checkbox h-6 w-6 accent-purple-500 cursor-pointer"
+            className={`form-checkbox accent-purple-500 cursor-pointer ${
+              isMacOS ? "mac-checkbox-size" : ""
+            }`}
             onChange={handleThemeSwitch}
             checked={theme === "dark"}
           />

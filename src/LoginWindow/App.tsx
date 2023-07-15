@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Login from "./Login";
+import LoginForm from "./LoginForm";
 
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
 import { Store } from "tauri-plugin-store-api";
@@ -17,8 +17,8 @@ function openMainWindow(): void {
 }
 
 function App() {
-  const [email, setEmail] = useState("asdsdas@adasd.ads");
-  const [password, setPassword] = useState("21231213");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   async function onFormSubmit() {
     openMainWindow();
@@ -27,7 +27,7 @@ function App() {
   }
 
   return (
-    <Login
+    <LoginForm
       onFormSubmit={onFormSubmit}
       email={email}
       setEmail={setEmail}

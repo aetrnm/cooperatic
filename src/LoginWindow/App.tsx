@@ -4,6 +4,8 @@ import LoginForm from "./LoginForm";
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
 import { Store } from "tauri-plugin-store-api";
 const store = new Store(".settings.dat");
+import Database from "tauri-plugin-sql-api";
+const db = await Database.load("mysql://root:qqqqqqqq@host/database");
 
 function openMainWindow(): void {
   const webview = new WebviewWindow("main_window", {

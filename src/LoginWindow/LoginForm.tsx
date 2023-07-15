@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { ScaleLoader } from "react-spinners";
 
-function Login(props: {
+function LoginForm(props: {
   onFormSubmit: () => void;
   email: string;
   setEmail(value: React.SetStateAction<string>): void;
@@ -86,4 +86,4 @@ function Login(props: {
   );
 }
 
-export default Login;
+export default LoginForm;

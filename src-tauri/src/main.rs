@@ -19,7 +19,7 @@ fn main() {
         &app,
         "login_window",
         tauri::WindowUrl::App("login.html".into()),
-        ).title("Login - Cooperatic").decorations(false).center().theme(Some(tauri::Theme::Light)).build();
+        ).title("Login - Cooperatic").decorations(true).inner_size(400.0, 350.0).center().theme(Some(tauri::Theme::Light)).build();
 
     app.run(|_, _| {});
 }

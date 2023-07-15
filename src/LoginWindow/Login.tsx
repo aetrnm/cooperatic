@@ -24,7 +24,6 @@ function Login(props: {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // After the asynchronous operation is complete
     setIsLoading(false);
     props.onFormSubmit();
   };

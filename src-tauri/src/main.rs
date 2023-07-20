@@ -3,29 +3,25 @@
 
 use sqlx::MySqlPool;
 use tauri::async_runtime::spawn;
-extern crate argon2;
-extern crate rand;
+use argon2::{self, Config};
+use rand::{Rng, thread_rng};
 
 fn generate_random_salt() -> [u8; 32] {
-    use rand::{Rng, thread_rng};
     let mut salt = [0u8; 32];
     let mut rng = thread_rng();
     rng.fill(&mut salt);
     salt
 }
 
-
 #[tauri::command]
 fn add_to_db(email: String, name: String, created: String, password: String) {
-    use argon2::{self, Config};
-
     let salt = generate_random_salt();
     let config = Config::default();
     let password_bytes = password.as_bytes();
-    let hash = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
+    let hashed_password = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
     
     spawn(async move {
-        if let Err(e) = add_to_db_impl(email.as_str(), name.as_str(), created.as_str(), hash.as_str()).await {
+        if let Err(e) = add_to_db_impl(email.as_str(), name.as_str(), created.as_str(), hashed_password.as_str()).await {
             eprintln!("Error: {:?}", e);
         }
     });

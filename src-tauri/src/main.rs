@@ -7,18 +7,18 @@ use argon2::{self, Config};
 use rand::{Rng, thread_rng};
 
 fn generate_random_salt() -> [u8; 32] {
-    let mut salt = [0u8; 32];
-    let mut rng = thread_rng();
+    let mut salt: [u8; 32] = [0u8; 32];
+    let mut rng: rand::rngs::ThreadRng = thread_rng();
     rng.fill(&mut salt);
     salt
 }
 
 #[tauri::command]
 fn add_to_db(email: String, name: String, created: String, password: String) {
-    let salt = generate_random_salt();
-    let config = Config::default();
-    let password_bytes = password.as_bytes();
-    let hashed_password = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
+    let salt: [u8; 32] = generate_random_salt();
+    let config: Config<'_> = Config::default();
+    let password_bytes: &[u8] = password.as_bytes();
+    let hashed_password: String = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
     
     spawn(async move {
         if let Err(e) = add_to_db_impl(email.as_str(), name.as_str(), created.as_str(), hashed_password.as_str()).await {
@@ -27,9 +27,9 @@ fn add_to_db(email: String, name: String, created: String, password: String) {
     });
 }
 
-async fn add_to_db_impl(email: &str, name: &str, created: &str, password: &str) -> Result<(), sqlx::Error> {
-    let pool = MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await?;
-    let query = format!("INSERT INTO users (email, name, created, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, password);
+async fn add_to_db_impl(email: &str, name: &str, created: &str, hashed_password: &str) -> Result<(), sqlx::Error> {
+    let pool: sqlx::Pool<sqlx::MySql> = MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await?;
+    let query: String = format!("INSERT INTO users (email, name, created, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, hashed_password);
     sqlx::query(&query).execute(&pool).await?;
 
     Ok(())
@@ -37,14 +37,14 @@ async fn add_to_db_impl(email: &str, name: &str, created: &str, password: &str) 
 
 
 fn main() {
-    let app = tauri::Builder::default()
+    let app: tauri::App = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![add_to_db])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 
 
-    let _local_window = tauri::WindowBuilder::new(
+    let _local_window: Result<tauri::Window, tauri::Error> = tauri::WindowBuilder::new(
         &app,
         "login_window",
         tauri::WindowUrl::App("login.html".into()),

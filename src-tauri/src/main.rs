@@ -1,16 +1,49 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+use sqlx::MySqlPool;
+use tauri::async_runtime::spawn;
+extern crate argon2;
+extern crate rand;
+
+fn generate_random_salt() -> [u8; 32] {
+    use rand::{Rng, thread_rng};
+    let mut salt = [0u8; 32];
+    let mut rng = thread_rng();
+    rng.fill(&mut salt);
+    salt
 }
+
+
+#[tauri::command]
+fn add_to_db(email: String, name: String, created: String, password: String) {
+    use argon2::{self, Config};
+
+    let salt = generate_random_salt();
+    let config = Config::default();
+    let password_bytes = password.as_bytes();
+    let hash = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
+    
+    spawn(async move {
+        if let Err(e) = add_to_db_impl(email.as_str(), name.as_str(), created.as_str(), hash.as_str()).await {
+            eprintln!("Error: {:?}", e);
+        }
+    });
+}
+
+async fn add_to_db_impl(email: &str, name: &str, created: &str, password: &str) -> Result<(), sqlx::Error> {
+    let pool = MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await?;
+    let query = format!("INSERT INTO users (email, name, created, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, password);
+    sqlx::query(&query).execute(&pool).await?;
+
+    Ok(())
+}
+
 
 fn main() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![add_to_db])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 

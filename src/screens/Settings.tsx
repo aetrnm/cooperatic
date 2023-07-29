@@ -6,22 +6,22 @@ const platformName = await platform();
 import { useEffect, useState } from "react";
 
 function Settings() {
-  const [theme, setTheme] = useState("");
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   useEffect(() => {
     const fetchTheme = async () => {
-      const storedTheme: any = await store.get("theme");
-      setTheme(storedTheme);
+      const storedTheme: any = await store.get("isDarkTheme");
+      setIsDarkTheme(storedTheme);
     };
 
     fetchTheme();
   }, []);
 
   const handleThemeSwitch = async () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    await store.set("theme", newTheme);
+    const newTheme = !isDarkTheme;
+    await store.set("isDarkTheme", newTheme);
     await store.save();
-    setTheme(newTheme);
+    setIsDarkTheme(newTheme);
   };
 
   return (
@@ -36,7 +36,7 @@ function Settings() {
               platformName === "darwin" ? "mac-checkbox" : "h-6 w-6"
             }`}
             onChange={handleThemeSwitch}
-            checked={theme === "dark"}
+            checked={isDarkTheme}
           />
         </label>
       </div>

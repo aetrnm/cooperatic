@@ -7,6 +7,7 @@ function LoginForm(props: {
   setEmail(value: React.SetStateAction<string>): void;
   password: string;
   setPassword(value: React.SetStateAction<string>): void;
+  onToggleRegisterForm(): void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,8 +30,8 @@ function LoginForm(props: {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen w-full">
-      <div className="bg-white rounded-md shadow-md p-8 w-full">
+    <div className="flex justify-center items-center w-full">
+      <div className="bg-white rounded-md shadow-md p-8 h-screen w-full">
         <h2 className="text-2xl font-semibold mb-6">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -80,6 +81,16 @@ function LoginForm(props: {
               )}
             </div>
           </button>
+          <p className="mt-4 text-gray-800">
+            Not a member yet?{" "}
+            <a
+              href="#"
+              onClick={props.onToggleRegisterForm}
+              className="text-purple-500 hover:text-purple-600"
+            >
+              Register here
+            </a>
+          </p>
         </form>
       </div>
     </div>

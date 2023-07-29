@@ -6,7 +6,7 @@ export default {
     "./src/*.{js,ts,jsx,tsx}",
     "./src/components/*.{js,ts,jsx,tsx}",
     "./src/screens/*.{js,ts,jsx,tsx}",
-    "./src/LoginWindow/*.{js,ts,jsx,tsx}",
+    "./src/EntryWindow/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {},

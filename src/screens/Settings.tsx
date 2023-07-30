@@ -1,19 +1,25 @@
 import { Store } from "tauri-plugin-store-api";
 const store = new Store(".settings.dat");
 import { platform } from "@tauri-apps/api/os";
-const platformName = await platform();
-
 import { useEffect, useState } from "react";
 
 function Settings() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [platformName, setPlatformName] = useState("");
+
+  useEffect(() => {
+    const fetchPlatformName = async () => {
+      const name = await platform();
+      setPlatformName(name);
+    };
+    fetchPlatformName();
+  }, []);
 
   useEffect(() => {
     const fetchTheme = async () => {
-      const storedTheme: any = await store.get("isDarkTheme");
+      const storedTheme: any= await store.get("isDarkTheme");
       setIsDarkTheme(storedTheme);
     };
-
     fetchTheme();
   }, []);
 

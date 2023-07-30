@@ -16,6 +16,8 @@ function openMainWindow(): void {
     maximized: false,
     width: 1000,
     height: 800,
+    minWidth: 1000,
+    minHeight: 800,
   });
   webview.once("tauri://created", async function () {
     await appWindow.close();

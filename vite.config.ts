@@ -24,5 +24,12 @@ export default defineConfig(async () => ({
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
+
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "./login.html"),
+        index: resolve(__dirname, "./index.html"),
+      },
+    },
   },
 }));

@@ -32,7 +32,7 @@ function App() {
   const [showLoginError, setShowLoginError] = useState(false);
 
   useEffect(() => {
-    Modal.setAppElement("#root"); // Use your root element's ID here
+    Modal.setAppElement("#root");
   }, []);
 
   const toggleLoginForm = () => {

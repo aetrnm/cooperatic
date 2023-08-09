@@ -13,12 +13,12 @@ fn generate_random_salt() -> [u8; 32] {
 }
 
 #[derive(serde::Serialize)]
-enum AddToDbResult {
+enum AddUserToDbResult {
     Success,
     Failure(String),
 }
 #[tauri::command]
-async fn add_to_db(email: String, name: String, created: String, password: String) -> AddToDbResult{
+async fn add_user_to_db(email: String, name: String, created: String, password: String) -> AddUserToDbResult{
     let salt: [u8; 32] = generate_random_salt();
     let config: Config<'_> = Config::default();
     let password_bytes: &[u8] = password.as_bytes();
@@ -26,23 +26,96 @@ async fn add_to_db(email: String, name: String, created: String, password: Strin
     
     match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
         Ok(pool) => {
-            let query: String = format!("INSERT INTO users (email, name, created, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, hashed_password);
+            let query: String = format!("INSERT INTO users (email, name, creation_date, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, hashed_password);
             match sqlx::query(&query).execute(&pool).await {
-                Ok(_) => AddToDbResult::Success,
-                Err(err) => AddToDbResult::Failure(err.to_string()),
+                Ok(_) => AddUserToDbResult::Success,
+                Err(err) => AddUserToDbResult::Failure(err.to_string()),
             }
         }
-        Err(err) => AddToDbResult::Failure(err.to_string()),
+        Err(err) => AddUserToDbResult::Failure(err.to_string()),
     }
 }
+
+fn generate_code() -> String {
+    let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let mut rng = rand::thread_rng();
+    let code: String = (0..6)
+        .map(|_| {
+            let idx = rng.gen_range(0..charset.len());
+            charset[idx] as char
+        })
+        .collect();
+    code
+}
+
+async fn get_id_by_email(email: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let database_url = "mysql://root:qqqqqqqq@127.0.0.1/cooperatic";
+    let pool = MySqlPool::connect(&database_url).await?;
+    let query = format!(
+        "SELECT id FROM users WHERE email = '{}'",
+        email
+    );
+    println!("HERE2");
+
+    let id_result = sqlx::query(&query)
+        .bind(email)
+        .fetch_optional(&pool)
+        .await?;
+
+    // Extract the id from the id_result and convert it to a String
+    let id_string = match id_result {
+        Some(row) => row.get::<u64, _>("id").to_string(),
+        None => String::new(), // You can customize this to handle the None case
+    };
+
+    Ok(id_string)
+}
+
+
+#[derive(serde::Serialize)]
+enum AddGroupToDbResult {
+    Success,
+    Failure(String),
+}
+#[tauri::command]
+async fn add_group_to_db(name: String, created: String, owner_email: String) -> AddGroupToDbResult {
+    let code = generate_code();
+    println!("HERE");
+    let owner_id: String = match get_id_by_email(&owner_email).await {
+        Ok(id) => id,
+        Err(err) => {
+            return AddGroupToDbResult::Failure(err.to_string());
+        }
+    };
+    println!("HERE, {}", owner_id);
+
+    match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
+        Ok(pool) => {
+            let group_query: String = format!("INSERT INTO `groups` (group_name, group_code, creation_date) VALUES ('{}', '{}', '{}')", name, code, created);
+            match sqlx::query(&group_query).execute(&pool).await {
+                Err(err) => return AddGroupToDbResult::Failure(err.to_string()),
+                Ok(_) => {
+                    let ownership_query = format!("INSERT INTO `groups_ownership` (`group_id`, `owner_id`) VALUES ((SELECT id FROM `groups` WHERE group_code = '{}'), {})", code, owner_id);
+                    match sqlx::query(&ownership_query).execute(&pool).await {
+                        Err(err) => return AddGroupToDbResult::Failure(err.to_string()),
+                        Ok(_) => return AddGroupToDbResult::Success,
+                    }
+                }
+            }
+        }
+        Err(err) => return AddGroupToDbResult::Failure(err.to_string()),
+    }
+}
+
 
 #[derive(serde::Serialize)]
 struct AuthenticationResult {
     success: bool,
     error_message: Option<String>,
 }
+
 #[tauri::command]
-async fn check_if_in_db(email: String, entered_password: String) -> AuthenticationResult {
+async fn check_if_user_in_db(email: String, entered_password: String) -> AuthenticationResult {
     match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
         Ok(pool) => {
             let query: String = format!("SELECT password FROM users WHERE email = '{}'", email);
@@ -86,7 +159,7 @@ fn verify_password(entered_password: &str, hashed_password: &str) -> bool {
 fn main() {
     let app: tauri::App = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![add_to_db, check_if_in_db])
+        .invoke_handler(tauri::generate_handler![add_user_to_db, check_if_user_in_db, add_group_to_db])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 

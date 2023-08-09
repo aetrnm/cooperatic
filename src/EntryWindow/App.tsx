@@ -44,7 +44,7 @@ function App() {
   };
 
   async function onRegisterFormSubmit() {
-    invoke("add_to_db", {
+    invoke("add_user_to_db", {
       email: email,
       name: email.split("@")[0],
       created: new Date(Date.now()).toISOString().slice(0, 10),
@@ -61,7 +61,7 @@ function App() {
     | { error_message: string; success: true };
 
   async function onLoginFormSubmit() {
-    const UserInDB: UserInDBResponse = await invoke("check_if_in_db", {
+    const UserInDB: UserInDBResponse = await invoke("check_if_user_in_db", {
       email: email,
       enteredPassword: password,
     });

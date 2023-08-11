@@ -56,9 +56,7 @@ function App() {
     await store.save();
   }
 
-  type UserInDBResponse =
-    | { error_message: null; success: false }
-    | { error_message: string; success: true };
+  type UserInDBResponse = "Success" | { Failure: string };
 
   async function onLoginFormSubmit() {
     const UserInDB: UserInDBResponse = await invoke("check_if_user_in_db", {
@@ -68,11 +66,11 @@ function App() {
 
     console.log(UserInDB);
 
-    if (UserInDB.success === true) {
+    if (UserInDB === "Success") {
       openMainWindow();
       await store.set("loggedInEmail", { value: email });
       await store.save();
-    } else if (UserInDB.success === false) {
+    } else if (UserInDB.Failure) {
       setShowLoginError(true);
     }
   }

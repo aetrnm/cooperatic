@@ -29,6 +29,10 @@ function Groups() {
     });
 
     console.log("Created group with name:", groupName);
+
+    setGroupCode("");
+    setGroupName("");
+    setShowPopup(false);
   };
 
   const handleClosePopup = () => {
@@ -56,6 +60,7 @@ function Groups() {
       >
         Join or Create a Group
       </button>
+      <hr className="my-2 border-gray-300 w-100" />
       {showPopup && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white rounded-md p-4 relative">
@@ -80,7 +85,6 @@ function Groups() {
             </button>
             <h2 className="text-xl font-semibold mb-4">Choose an Option</h2>
             <div className="grid grid-cols-2 gap-4">
-              {/* Card 1 - Join a group with a code */}
               <div className="border rounded-md p-4 flex flex-col justify-center items-center">
                 <h3 className="text-lg font-semibold mb-2">
                   Join a group with a code
@@ -91,7 +95,7 @@ function Groups() {
                   placeholder="Enter code"
                   value={groupCode}
                   onChange={handleInputChange}
-                  maxLength={6} // Limit the input to six characters
+                  maxLength={6}
                 />
                 <button
                   className="bg-purple-500 text-white py-2 px-4 rounded-md mt-4 hover:bg-purple-600 transition-colors duration-300 w-full"
@@ -101,7 +105,6 @@ function Groups() {
                 </button>
               </div>
 
-              {/* Card 2 - Create your group */}
               <div className="border rounded-md p-4 flex flex-col justify-center items-center">
                 <h3 className="text-lg font-semibold mb-2">
                   Create your group

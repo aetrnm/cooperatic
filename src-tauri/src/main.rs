@@ -14,6 +14,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             auth::check_if_user_in_db,
             user::add_user_to_db,
+            user::get_id_by_email,
+            user::get_groups_by_user_id,
             group::add_group_to_db
         ])
         .build(tauri::generate_context!())

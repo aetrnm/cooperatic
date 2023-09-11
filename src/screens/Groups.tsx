@@ -1,28 +1,27 @@
-import { useState, ChangeEvent } from "react";
-
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Store } from "tauri-plugin-store-api";
+
 const store = new Store(".settings.dat");
 
 function Groups() {
-  const [showPopup, setShowPopup] = useState(false);
-  const [groupCode, setGroupCode] = useState("");
-  const [groupName, setGroupName] = useState("");
+  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [groupCode, setGroupCode] = useState<string>("");
+  const [groupName, setGroupName] = useState<string>("");
+  const [userGroups, setUserGroups] = useState<number[]>([]);
 
   const handlePopupToggle = () => {
     setShowPopup((prevState) => !prevState);
   };
 
   const handleJoinGroup = () => {
-    // Add your logic for joining a group here
-    // For example, you can navigate to a different page or display a notification.
     console.log("Join group button clicked with code:", groupCode);
   };
 
   const handleCreateGroup = async () => {
     const storedEmail: any = await store.get("loggedInEmail");
 
-    invoke("add_group_to_db", {
+    invoke<number[]>("add_group_to_db", {
       name: groupName,
       created: new Date(Date.now()).toISOString().slice(0, 10),
       ownerEmail: storedEmail.value,
@@ -33,6 +32,8 @@ function Groups() {
     setGroupCode("");
     setGroupName("");
     setShowPopup(false);
+
+    window.location.reload();
   };
 
   const handleClosePopup = () => {
@@ -43,13 +44,36 @@ function Groups() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputText = e.target.value.toUpperCase().slice(0, 6);
-    const filteredText = inputText.replace(/[^A-Z0-9]/g, ""); // Filter out non-letters and non-numbers
+    const filteredText = inputText.replace(/[^A-Z0-9]/g, "");
     setGroupCode(filteredText);
   };
 
   const handleGroupNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setGroupName(e.target.value);
   };
+
+  const fetchUserGroups = async () => {
+    try {
+      const storedID: any = await store.get("loggedInID");
+      const response = await invoke<number[]>("get_groups_by_user_id", {
+        userId: parseInt(storedID.value, 10),
+      });
+
+      setUserGroups(response);
+
+      if (!response || response.length === 0) {
+        setUserGroups([]);
+      } else {
+        console.error("Failed to fetch user groups!");
+      }
+    } catch (error) {
+      console.error("An error occurred while fetching user groups!");
+    }
+  };
+
+  useEffect(() => {
+    fetchUserGroups();
+  }, []);
 
   return (
     <div className="p-4">
@@ -61,6 +85,17 @@ function Groups() {
         Join or Create a Group
       </button>
       <hr className="my-2 border-gray-300 w-100" />
+
+      <div className="grid grid-cols-2 gap-4">
+        {userGroups.map((group, index) => (
+          <div key={index} className="w-full">
+            <div className="bg-white border rounded-md p-4 hover:cursor-pointer hover:bg-gray-200 transition-colors duration-100">
+              Group {group}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {showPopup && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white rounded-md p-4 relative">
@@ -98,7 +133,7 @@ function Groups() {
                   maxLength={6}
                 />
                 <button
-                  className="bg-purple-500 text-white py-2 px-4 rounded-md mt-4 hover:bg-purple-600 transition-colors duration-300 w-full"
+                  className="bg-purple-500 text-white py-2 px-4 rounded-md mt-4 hover-bg-purple-600 transition-colors duration-300 w-full"
                   onClick={handleJoinGroup}
                 >
                   Join group

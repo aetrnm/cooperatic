@@ -51,8 +51,13 @@ function App() {
       password: password,
     });
 
+    const user_id = await invoke("get_id_by_email", {
+      email: email,
+    });
+
     openMainWindow();
     await store.set("loggedInEmail", { value: email });
+    await store.set("loggedInID", { value: user_id });
     await store.save();
   }
 
@@ -64,11 +69,16 @@ function App() {
       enteredPassword: password,
     });
 
-    console.log(UserInDB);
+    const user_id = await invoke("get_id_by_email", {
+      email: email,
+    });
+
+    console.log(user_id);
 
     if (UserInDB === "Success") {
       openMainWindow();
       await store.set("loggedInEmail", { value: email });
+      await store.set("loggedInID", { value: user_id });
       await store.save();
     } else if (UserInDB.Failure) {
       setShowLoginError(true);

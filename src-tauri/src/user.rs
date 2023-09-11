@@ -1,4 +1,3 @@
-
 use sqlx::{MySqlPool, Row};    
 use crate::enums::ActionResult;
 use argon2::{self, Config};
@@ -30,23 +29,53 @@ pub async fn add_user_to_db(email: String, name: String, created: String, passwo
     }
 }
 
-pub async fn get_id_by_email(email: &str) -> Result<String, Box<dyn std::error::Error>> {
+#[tauri::command]
+pub async fn get_id_by_email(email: &str) -> Result<String, String> {
     let database_url = "mysql://root:qqqqqqqq@127.0.0.1/cooperatic";
-    let pool = MySqlPool::connect(&database_url).await?;
-    let query = format!(
-        "SELECT id FROM users WHERE email = '{}'",
-        email
-    );
+    let pool = MySqlPool::connect(&database_url).await;
+    
+    match pool {
+        Ok(pool) => {
+            let query = format!("SELECT id FROM users WHERE email = '{}'", email);
+    
+            match sqlx::query(&query)
+                .bind(email)
+                .fetch_optional(&pool)
+                .await
+            {
+                Ok(id_result) => {
+                    let id_string = match id_result {
+                        Some(row) => row.get::<u64, _>("id").to_string(),
+                        None => String::new(),
+                    };
+                    Ok(id_string)
+                }
+                Err(err) => Err(err.to_string()),
+            }
+        }
+        Err(err) => Err(err.to_string()),
+    }
+}
 
-    let id_result = sqlx::query(&query)
-        .bind(email)
-        .fetch_optional(&pool)
-        .await?;
+#[tauri::command]
+pub async fn get_groups_by_user_id(user_id: u64) -> Result<Vec<u64>, ActionResult> {
+    let database_url = "mysql://root:qqqqqqqq@127.0.0.1/cooperatic";
 
-    let id_string = match id_result {
-        Some(row) => row.get::<u64, _>("id").to_string(),
-        None => String::new(),
-    };
+    if let Ok(pool) = MySqlPool::connect(&database_url).await {
+        let query = format!("SELECT group_id FROM `users_groups` WHERE user_id = '{user_id}'");
 
-    Ok(id_string)
+        if let Ok(rows) = sqlx::query(&query)
+            .bind(user_id)
+            .fetch_all(&pool)
+            .await
+        {
+            let groups: Vec<u64> = rows.iter().map(|row| row.get("group_id")).collect();
+
+            Ok(groups)
+        } else {
+            Err(ActionResult::Failure("Failed to execute the query.".to_string()))
+        }
+    } else {
+        Err(ActionResult::Failure("Failed to connect to the database.".to_string()))
+    }
 }

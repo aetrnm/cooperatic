@@ -25,7 +25,7 @@ pub async fn check_if_user_in_db(email: String, entered_password: String) -> Act
                               ActionResult::Success
                             }
                             else {
-                              ActionResult::Failure("Invalid password".to_string())
+                              ActionResult::Failure("Wrong password".to_string())
                             }
                         }
                         None => ActionResult::Failure("User not found".to_string()),

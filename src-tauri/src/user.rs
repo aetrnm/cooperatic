@@ -17,7 +17,7 @@ pub async fn add_user_to_db(email: String, name: String, created: String, passwo
     let password_bytes: &[u8] = password.as_bytes();
     let hashed_password: String = argon2::hash_encoded(password_bytes, &salt, &config).unwrap();
     
-    match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
+    match MySqlPool::connect("mysql://root:=Z6&pcj1VM@127.0.0.1/cooperatic").await {
         Ok(pool) => {
             let query: String = format!("INSERT INTO users (email, name, creation_date, password) VALUES ('{}', '{}', '{}', '{}')", email, name, created, hashed_password);
             match sqlx::query(&query).execute(&pool).await {
@@ -31,7 +31,7 @@ pub async fn add_user_to_db(email: String, name: String, created: String, passwo
 
 #[tauri::command]
 pub async fn get_id_by_email(email: &str) -> Result<String, String> {
-    let database_url = "mysql://root:qqqqqqqq@127.0.0.1/cooperatic";
+    let database_url = "mysql://root:=Z6&pcj1VM@127.0.0.1/cooperatic";
     let pool = MySqlPool::connect(&database_url).await;
     
     match pool {
@@ -59,7 +59,7 @@ pub async fn get_id_by_email(email: &str) -> Result<String, String> {
 
 #[tauri::command]
 pub async fn get_groups_by_user_id(user_id: u64) -> Result<Vec<u64>, ActionResult> {
-    let database_url = "mysql://root:qqqqqqqq@127.0.0.1/cooperatic";
+    let database_url = "mysql://root:=Z6&pcj1VM@127.0.0.1/cooperatic";
 
     if let Ok(pool) = MySqlPool::connect(&database_url).await {
         let query = format!("SELECT group_id FROM `users_groups` WHERE user_id = '{user_id}'");

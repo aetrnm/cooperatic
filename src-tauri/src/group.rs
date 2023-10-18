@@ -25,7 +25,7 @@ pub async fn add_group_to_db(name: String, created: String, owner_email: String)
         }
     };
 
-    match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
+    match MySqlPool::connect("mysql://root:=Z6&pcj1VM@127.0.0.1/cooperatic").await {
         Ok(pool) => {
             let group_query: String = format!("INSERT INTO `groups` (group_name, group_code, creation_date) VALUES ('{}', '{}', '{}')", name, code, created);
             match sqlx::query(&group_query).execute(&pool).await {

@@ -12,7 +12,7 @@ pub fn verify_password(entered_password: &str, hashed_password: &str) -> bool {
 
 #[tauri::command]
 pub async fn check_if_user_in_db(email: String, entered_password: String) -> ActionResult {
-    match MySqlPool::connect("mysql://root:qqqqqqqq@127.0.0.1/cooperatic").await {
+    match MySqlPool::connect("mysql://root:=Z6&pcj1VM@127.0.0.1/cooperatic").await {
         Ok(pool) => {
             let query: String = format!("SELECT password FROM users WHERE email = '{}'", email);
             match sqlx::query(&query).fetch_optional(&pool).await {
